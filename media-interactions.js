@@ -7,6 +7,7 @@
     video.addEventListener('click', e => {
       if (video.classList.contains('creation-preview')) return;
       e.preventDefault();
+      e.stopImmediatePropagation();
       if (video.paused) {
         video.muted = false;
         video.volume = 1;
@@ -17,11 +18,7 @@
       } else {
         video.pause();
       }
-    });
-    video.addEventListener('play', () => {
-      if (!video.paused) video.setAttribute('data-playing','1');
-    });
-    video.addEventListener('pause', () => video.removeAttribute('data-playing'));
+    }, {capture:true});
   }
   const observer = new MutationObserver(() => getVideos().forEach(wire));
   observer.observe(document.getElementById('app') || document.body, {childList:true,subtree:true});
