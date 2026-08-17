@@ -1,0 +1,3 @@
+/* MAX mobile chat state: navigation only. The existing chat DOM and composer stay in place. */
+.messages-page .messages-contacts.contacts-hidden{display:none!important}
+.messages-page .conversation[hidden]{display:none!important}
