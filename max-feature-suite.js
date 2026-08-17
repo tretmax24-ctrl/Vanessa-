@@ -1,0 +1,122 @@
+(()=>{
+'use strict';
+const sb=window.supabaseClient;
+const app=document.getElementById('app');
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+let me=null, noticeChannel=null, messageChannel=null, observerStarted=false;
+
+async function currentUser(){ if(me) return me; const {data,error}=await sb.auth.getUser(); if(error||!data.user)return null; me=data.user; return me; }
+function toast(text){ let el=document.getElementById('max-toast'); if(!el){el=document.createElement('div');el.id='max-toast';document.body.appendChild(el)} el.textContent=text;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3800); }
+
+async function followPerson(btn,id){
+  const u=await currentUser(); if(!u||!id||id===u.id)return;
+  btn.disabled=true;
+  try{
+    const {data,error}=await sb.from('follows').select('following_id').eq('follower_id',u.id).eq('following_id',id).maybeSingle();
+    if(error)throw error;
+    const r=data
+      ? await sb.from('follows').delete().eq('follower_id',u.id).eq('following_id',id)
+      : await sb.from('follows').insert({follower_id:u.id,following_id:id});
+    if(r.error)throw r.error;
+    btn.textContent=data?'Follow':'Following';
+    btn.classList.toggle('following',!data);
+    toast(data?'Unfollowed':'Following');
+  }catch(e){toast(e.message||'Could not update follow')}
+  finally{btn.disabled=false}
+}
+
+async function enhancePeopleRows(root){
+  const u=await currentUser(); if(!u)return;
+  for(const row of $$('.person-row',root)){
+    const main=$('.person-main',row); if(!main || row.querySelector('[data-suite-follow]'))continue;
+    const profileId=main.dataset.userId || main.getAttribute('data-user-id');
+    if(!profileId || profileId===u.id)continue;
+    const btn=document.createElement('button');
+    btn.type='button';btn.className='secondary mini-follow';btn.dataset.suiteFollow='1';btn.textContent='Follow';
+    btn.addEventListener('click',e=>{e.stopPropagation();followPerson(btn,profileId)});
+    row.appendChild(btn);
+    try{const r=await sb.from('follows').select('following_id').eq('follower_id',u.id).eq('following_id',profileId).maybeSingle();if(!r.error&&r.data){btn.textContent='Following';btn.classList.add('following')}}catch{}
+  }
+}
+
+async function enhanceProfile(){
+  const u=await currentUser(); if(!u)return;
+  const page=$('.profile-page'); if(!page)return;
+  const stats=$('.profile-stats',page); if(!stats || $('.likes-stat',stats))return;
+  const {count}=await sb.from('post_likes').select('post_id',{count:'exact',head:true}).in('post_id',(await sb.from('posts').select('id').eq('author_id',u.id)).data?.map(x=>x.id)||[]);
+  const box=document.createElement('div');box.className='likes-stat';box.innerHTML=`<b>${count||0}</b><span>Likes received</span>`;stats.appendChild(box);
+}
+
+async function enhanceCreate(){
+  const panel=$('.creator-panel'); if(!panel)return;
+  const ta=$('#caption',panel)||$('textarea[name="caption"]',panel)||$('.caption-input',panel)||$('textarea',panel);
+  if(ta){
+    ta.setAttribute('maxlength','2200');
+    if(!ta.placeholder||ta.placeholder==='Caption')ta.placeholder='Write a caption that feels like you…';
+    ta.classList.add('max-caption-input');
+  }
+  const choices=$('.create-grid'); if(choices)choices.classList.add('feature-ready');
+}
+
+async function refreshUnread(){
+  const u=await currentUser(); if(!u)return;
+  const {count,error}=await sb.from('notifications').select('id',{count:'exact',head:true}).eq('user_id',u.id).is('read_at',null);
+  if(error)return;
+  $$('[data-nav="bell"]').forEach(nav=>{
+    let b=nav.querySelector('.max-badge');
+    if(!count){if(b)b.remove();return}
+    if(!b){b=document.createElement('span');b.className='max-badge';nav.appendChild(b)}b.textContent=count>99?'99+':String(count);
+  });
+}
+
+async function subscribeNotifications(){
+  const u=await currentUser(); if(!u||noticeChannel)return;
+  noticeChannel=sb.channel('max-notification-feed')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'notifications',filter:`user_id=eq.${u.id}`},payload=>{
+      toast(payload.new?.title||'New notification');
+      refreshUnread();
+    }).subscribe();
+}
+
+async function subscribeMessages(){
+  const u=await currentUser(); if(!u||messageChannel)return;
+  messageChannel=sb.channel('max-global-messages')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages'},async payload=>{
+      if(payload.new?.sender_id===u.id)return;
+      toast('New message');
+      if(document.hidden && 'Notification' in window){
+        if(Notification.permission==='granted')new Notification('MAX', {body:'You have a new message'});
+      }
+    }).subscribe();
+  if('Notification' in window && Notification.permission==='default'){
+    try{await Notification.requestPermission()}catch{}
+  }
+}
+
+function injectDeleteAffordance(){
+  // Make ownership rules visually obvious without exposing delete on other users' posts.
+  $$('[data-delete]').forEach(btn=>{btn.title='Delete your post';btn.setAttribute('aria-label','Delete your post')});
+}
+
+function watch(){
+  if(observerStarted)return;observerStarted=true;
+  const mo=new MutationObserver(()=>{
+    enhancePeopleRows(document).catch(()=>{});
+    enhanceProfile().catch(()=>{});
+    enhanceCreate().catch(()=>{});
+    refreshUnread().catch(()=>{});
+    injectDeleteAffordance();
+  });
+  mo.observe(app,{childList:true,subtree:true});
+}
+
+(async()=>{
+  watch();
+  const u=await currentUser();
+  if(!u)return;
+  subscribeNotifications();
+  subscribeMessages();
+  refreshUnread();
+})();
+})();
