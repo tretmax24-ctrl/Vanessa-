@@ -1,15 +1,15 @@
 /* MAX chat layout + mobile navigation. One DOM: contacts -> conversation -> chatMessages -> chatCompose. */
 .messages-page{min-height:0;overflow:hidden}
-.messages-page .conversation{min-height:0;min-width:0;display:flex!important;flex-direction:column!important;overflow:hidden!important}
+.messages-page .conversation{min-height:0;min-width:0;display:grid!important;grid-template-rows:68px minmax(0,1fr) auto!important;overflow:hidden!important}
 .messages-page .conversation[hidden]{display:none!important}
 .messages-page .messages-contacts.contacts-hidden{display:none!important}
-.messages-page #chatMessages{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;padding:18px 20px!important}
-.messages-page #chatCompose{flex:0 0 auto!important;display:flex!important;visibility:visible!important;opacity:1!important;min-height:68px!important;width:100%!important;align-items:center!important;gap:8px!important;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))!important;background:#0d1118!important;border-top:1px solid var(--mx-line)!important;z-index:5!important}
+.messages-page #chatMessages{grid-row:2;min-height:0!important;height:auto!important;max-height:none!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior:contain!important;padding:18px 20px!important}
+.messages-page #chatCompose{grid-row:3;display:flex!important;visibility:visible!important;opacity:1!important;min-height:68px!important;width:100%!important;align-items:center!important;gap:8px!important;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px))!important;background:#0d1118!important;border-top:1px solid var(--mx-line)!important;z-index:5!important}
 .messages-page #chatCompose #chatInput{flex:1 1 auto!important;min-width:0!important;height:46px!important;margin:0!important;padding:0 14px!important;border:1px solid var(--mx-line)!important;border-radius:18px!important;background:#151a22!important;color:#fff!important}
 .messages-page #chatCompose button{flex:0 0 46px!important;width:46px!important;height:46px!important;margin:0!important;padding:0!important;border-radius:14px!important}
 @media(max-width:900px){
 .messages-page{height:100dvh!important;min-height:0!important}
-.messages-page .conversation{position:absolute!important;inset:0!important;height:100dvh!important;width:100%!important;z-index:30!important}
+.messages-page .conversation{position:absolute!important;inset:0!important;height:100dvh!important;width:100%!important;z-index:30!important;grid-template-rows:64px minmax(0,1fr) auto!important}
 .messages-page #chatMessages{padding:12px 14px 14px!important}
 .messages-page #chatCompose{min-height:64px!important;padding:9px 10px calc(9px + env(safe-area-inset-bottom,0px))!important}
 .messages-page #chatCompose #chatInput{height:44px!important;border-radius:16px!important}
