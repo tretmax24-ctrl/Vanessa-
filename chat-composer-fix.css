@@ -1,0 +1,12 @@
+/* MAX chat composer: keep the typing area visible while history scrolls */
+.messages-page .conversation{display:flex!important;flex-direction:column!important;min-height:0!important;height:100%!important;overflow:hidden!important;position:relative!important}
+.messages-page #chatMessages,.messages-page .chat-messages{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;padding-bottom:12px!important}
+.messages-page #chatForm,.messages-page .chat-form,.messages-page .composer,.messages-page .chat-composer{flex:0 0 auto!important;position:relative!important;display:flex!important;visibility:visible!important;opacity:1!important;z-index:30!important;min-height:64px!important;padding:10px 12px!important;background:rgba(11,14,19,.98)!important;border-top:1px solid rgba(255,255,255,.09)!important;box-shadow:0 -10px 28px rgba(0,0,0,.25)!important}
+.messages-page #chatForm input,.messages-page #chatForm textarea,.messages-page .chat-form input,.messages-page .chat-form textarea,.messages-page .composer input,.messages-page .composer textarea,.messages-page .chat-composer input,.messages-page .chat-composer textarea{display:block!important;visibility:visible!important;opacity:1!important;min-height:46px!important;max-height:120px!important;flex:1 1 auto!important;min-width:0!important}
+.messages-page #chatForm button,.messages-page .chat-form button,.messages-page .composer button,.messages-page .chat-composer button{flex:0 0 auto!important;visibility:visible!important;opacity:1!important}
+@media (max-width:760px){
+  .messages-page{height:calc(100dvh - 92px)!important;min-height:0!important;border-radius:0!important}
+  .messages-page .conversation{height:100%!important;min-height:0!important}
+  .messages-page #chatMessages,.messages-page .chat-messages{padding-bottom:calc(12px + env(safe-area-inset-bottom))!important}
+  .messages-page #chatForm,.messages-page .chat-form,.messages-page .composer,.messages-page .chat-composer{padding:8px 10px calc(8px + env(safe-area-inset-bottom))!important;min-height:62px!important}
+}
