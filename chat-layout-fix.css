@@ -1,21 +1,20 @@
-/* MAX chat viewport fix: message history scrolls, composer always remains reachable. */
+/* MAX chat layout — matches the actual live chat DOM: #chatBody + #chatForm.chat-form */
 .messages-page{min-height:0;height:calc(100dvh - 120px);overflow:hidden}
-.conversation{min-height:0;height:100%;overflow:hidden;display:flex;flex-direction:column}
-.conversation-head{flex:0 0 68px}
-.chat-messages{flex:1 1 auto;min-height:0;overflow-y:auto;overflow-x:hidden;padding:18px 20px 14px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
-.chat-compose{flex:0 0 auto;min-height:68px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:rgba(11,14,19,.96);border-top:1px solid var(--mx-line);display:flex;align-items:center;gap:10px;position:relative;z-index:20}
-.chat-compose input{flex:1 1 auto;min-width:0;height:46px;margin:0!important;padding:0 16px!important;border:1px solid var(--mx-line)!important;border-radius:16px!important;background:#171b23!important;color:#fff!important;outline:0}
-.chat-compose button{flex:0 0 46px;height:46px;padding:0;border-radius:14px}
-.chat-messages .bubble{max-width:min(72%,560px);margin:0 0 9px;overflow-wrap:anywhere}
+.messages-page .conversation{min-height:0;height:100%;overflow:hidden;display:flex!important;flex-direction:column!important;position:relative}
+.messages-page .conversation-head{height:68px;flex:0 0 68px;display:flex;align-items:center}
+.messages-page #chatBody{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow-y:auto!important;overflow-x:hidden!important;padding:18px 20px 14px!important;overscroll-behavior:contain!important;-webkit-overflow-scrolling:touch!important}
+.messages-page #chatForm.chat-form{flex:0 0 auto!important;min-height:70px!important;width:100%!important;display:flex!important;align-items:center!important;gap:10px!important;position:relative!important;z-index:50!important;padding:11px 14px calc(11px + env(safe-area-inset-bottom,0px))!important;background:rgba(11,14,19,.98)!important;border-top:1px solid var(--mx-line)!important;visibility:visible!important;opacity:1!important}
+.messages-page #chatForm.chat-form #chatText{display:block!important;visibility:visible!important;opacity:1!important;flex:1 1 auto!important;min-width:0!important;height:46px!important;margin:0!important;padding:0 16px!important;border:1px solid var(--mx-line)!important;border-radius:16px!important;background:#171b23!important;color:#fff!important;outline:0!important}
+.messages-page #chatForm.chat-form button{display:grid!important;place-items:center!important;visibility:visible!important;opacity:1!important;flex:0 0 46px!important;width:46px!important;height:46px!important;padding:0!important;border-radius:14px!important}
+.messages-page #chatBody .bubble{max-width:min(72%,560px);margin:0 0 9px;overflow-wrap:anywhere}
 @media (max-width:900px){
   .messages-page{height:calc(100dvh - 92px);min-height:0;display:block;position:relative;border-radius:0;overflow:hidden}
-  .messages-contacts{height:100%;border-right:0;overflow:auto}
-  .messages-contacts.contacts-hidden{display:none}
-  .conversation{height:100%;width:100%;position:absolute;inset:0;z-index:30;border-radius:0}
-  .conversation-head{height:62px;flex-basis:62px;padding-top:max(0px,env(safe-area-inset-top,0px));}
-  .chat-messages{padding:14px 14px 10px}
-  .chat-compose{min-height:64px;padding:9px 10px calc(9px + env(safe-area-inset-bottom,0px))}
-  .chat-compose input{height:44px;border-radius:15px!important}
-  .chat-compose button{flex-basis:44px;height:44px}
-  .chat-messages .bubble{max-width:84%}
+  .messages-page .messages-contacts{height:100%;border-right:0;overflow:auto}
+  .messages-page .conversation{height:100%;width:100%;position:absolute;inset:0;z-index:30;border-radius:0}
+  .messages-page .conversation-head{height:62px;flex-basis:62px;padding-top:max(0px,env(safe-area-inset-top,0px))}
+  .messages-page #chatBody{padding:14px 14px 10px!important}
+  .messages-page #chatForm.chat-form{min-height:64px!important;padding:9px 10px calc(9px + env(safe-area-inset-bottom,0px))!important}
+  .messages-page #chatForm.chat-form #chatText{height:44px!important;border-radius:15px!important}
+  .messages-page #chatForm.chat-form button{flex-basis:44px!important;width:44px!important;height:44px!important}
+  .messages-page #chatBody .bubble{max-width:84%}
 }
