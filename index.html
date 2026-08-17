@@ -9,7 +9,12 @@
 </head>
 <body>
 <header class="topbar"><div class="brand">MAX<span>•</span></div><div id="topActions"></div></header>
-<main><div id="status" aria-live="polite"></div><div id="app"><section class="card auth-card"><div class="brand big">MAX</div><h1>Welcome</h1><p class="muted">Your community. Your messages. Your people.</p><div class="skeleton"></div></section></div></main>
+<main><div id="status" aria-live="polite"></div><div id="app"><section class="card auth-card"><div class="brand big">MAX</div><h1>Welcome</h1><p class="muted">Your community. Your messages. Your people.</p><div class="skeleton"></div></div></main>
 <script src="config.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script>window.supabaseClient=window.supabase.createClient(window.MAX_CONFIG.supabaseUrl,window.MAX_CONFIG.supabaseAnonKey);</script><script src="app.js"></script>
+<script>
+const enableVideoAudio=()=>document.querySelectorAll('video').forEach(v=>{v.muted=false;v.removeAttribute('muted');v.volume=1});
+enableVideoAudio();
+new MutationObserver(enableVideoAudio).observe(document.body,{childList:true,subtree:true});
+</script>
 </body>
 </html>
