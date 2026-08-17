@@ -11,10 +11,7 @@
       if (video.paused) {
         video.muted = false;
         video.volume = 1;
-        video.play().catch(() => {
-          video.muted = true;
-          video.play().catch(() => {});
-        });
+        video.play().catch(() => {});
       } else {
         video.pause();
       }
