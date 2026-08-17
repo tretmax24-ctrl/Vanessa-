@@ -1,0 +1,54 @@
+/* MAX interaction polish — targeted component fixes */
+/* Remove the stray top-page circular artifact created by legacy controls. */
+.mobile-feed-top .ghost-icon{width:40px!important;height:40px!important;border-radius:12px!important;background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.12)!important;display:grid!important;place-items:center!important;color:#fff!important;box-shadow:none!important}
+
+/* Feed action rail: replace crude glyph buttons with intentional controls. */
+.reel-actions button{font-size:0!important;width:54px!important;height:58px!important;border-radius:17px!important;display:flex!important;flex-direction:column!important;align-items:center!important;justify-content:center!important;gap:3px!important;color:#fff!important}
+.reel-actions button::before{font-size:24px!important;line-height:1!important;font-weight:500!important}
+.reel-actions button[data-like]::before{content:'♡'}
+.reel-actions button[data-comment]::before{content:'◌'}
+.reel-actions button[data-share]::before{content:'↗'}
+.reel-actions button.liked::before{content:'♥'}
+.reel-actions button small{font-size:10px!important;line-height:1!important;display:block!important;color:#e3e6ef!important;font-weight:700!important}
+.reel-actions button:hover{transform:translateY(-2px)!important;background:rgba(124,108,255,.92)!important;border-color:rgba(255,255,255,.25)!important}
+
+/* Follow is always visibly separated from the username. */
+.reel-author{position:relative!important;display:flex!important;flex-wrap:wrap!important;padding-bottom:8px!important}
+.reel-author>div{min-width:120px!important;flex:1 1 auto!important}
+.follow-mini{display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:0 0 auto!important;min-width:86px!important;height:34px!important;margin:2px 0 0 4px!important;font-weight:800!important;letter-spacing:.01em!important;opacity:1!important;visibility:visible!important;z-index:20!important}
+.follow-mini.following{opacity:.9!important}
+
+/* Messages search is a real input, not a fake flex container. */
+.message-search{display:block!important;width:calc(100% - 28px)!important;height:50px!important;min-height:50px!important;margin:0 14px 14px!important;padding:0 16px!important;border-radius:16px!important;background:#171a22!important;color:#fff!important;font-size:15px!important;line-height:50px!important;box-sizing:border-box!important}
+.message-search::placeholder{color:#7f8797!important;opacity:1!important}
+.message-search:focus{border-color:#7668ff88!important;box-shadow:0 0 0 4px #7668ff12!important}
+
+/* Contact rows are full-width, readable inbox rows. */
+.contact-row{width:100%!important;display:flex!important;align-items:center!important;min-height:84px!important;padding:14px 16px!important;gap:12px!important}
+.contact-copy{min-width:0!important;flex:1 1 auto!important}
+.contact-arrow{margin-left:auto!important}
+
+/* Create choices: strong breathing room and visual hierarchy on every breakpoint. */
+.create-choice{gap:18px!important;padding:28px!important}
+.create-choice button{min-height:220px!important;padding:26px!important;border-radius:26px!important}
+.create-choice button b{font-size:20px!important;line-height:1.1!important}
+.create-choice button small{font-size:13px!important;line-height:1.4!important}
+
+/* Desktop spacing. */
+@media(min-width:761px){
+  .reel-actions{right:20px!important;bottom:30px!important;gap:12px!important}
+  .reel-info{right:130px!important}
+}
+
+/* Mobile: keep follow in the readable creator zone and make actions clean. */
+@media(max-width:760px){
+  .reel-info{left:18px!important;right:92px!important;bottom:22px!important}
+  .reel-author{gap:9px!important}
+  .follow-mini{min-width:82px!important;height:32px!important;padding:7px 11px!important;font-size:11px!important}
+  .reel-actions{right:9px!important;bottom:92px!important;gap:9px!important}
+  .reel-actions button{width:50px!important;height:56px!important;border-radius:16px!important}
+  .message-search{height:52px!important;min-height:52px!important;border-radius:16px!important;margin:0 14px 16px!important}
+  .create-choice{grid-template-columns:1fr 1fr!important;gap:16px!important;padding:22px 14px 96px!important}
+  .create-choice button{min-height:176px!important;padding:20px!important}
+  .create-choice button b{font-size:18px!important}
+}
