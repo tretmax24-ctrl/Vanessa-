@@ -22,7 +22,7 @@ jobs:
           node-version: 22
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -32,6 +32,9 @@ jobs:
 
       - name: Generate Android project
         run: npx cap add android
+
+      - name: Patch Android permissions
+        run: python3 android-build/patch_android_permissions.py
 
       - name: Sync Capacitor
         run: npx cap sync android
