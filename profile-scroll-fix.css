@@ -1,0 +1,49 @@
+#max-edit-profile{
+  position:fixed!important;
+  inset:0!important;
+  z-index:10000!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:16px!important;
+  box-sizing:border-box!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+#max-edit-profile .max-edit-backdrop{
+  position:fixed!important;
+  inset:0!important;
+}
+#max-edit-profile .max-edit-card{
+  position:relative!important;
+  width:min(560px,100%)!important;
+  max-height:calc(100dvh - 32px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  box-sizing:border-box!important;
+  overscroll-behavior:contain!important;
+  scrollbar-gutter:stable!important;
+}
+#max-edit-profile #maxEditForm{
+  min-height:0!important;
+}
+#max-edit-profile .max-edit-actions{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:3!important;
+  padding:14px 0 max(14px,env(safe-area-inset-bottom))!important;
+  margin-top:6px!important;
+  background:linear-gradient(180deg,rgba(13,16,24,0),rgba(13,16,24,.96) 34%)!important;
+}
+@media(max-width:640px){
+  #max-edit-profile{align-items:flex-start!important;padding:8px!important}
+  #max-edit-profile .max-edit-card{
+    width:100%!important;
+    max-height:calc(100dvh - 16px)!important;
+    margin-top:8px!important;
+    margin-bottom:8px!important;
+    border-radius:24px!important;
+  }
+}
