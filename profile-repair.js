@@ -1,1 +1,91 @@
-(()=>{\n'use strict';\nconst sb=window.supabaseClient;const $=(s,r=document)=>r.querySelector(s);const $$=(s,r=document)=>[...r.querySelectorAll(s)];const esc=v=>String(v??'').replace(/[&<>\\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\"':'&quot;',"'":'&#039;'}[c]));const initial=v=>(String(v||'M').trim().charAt(0).toUpperCase()||'M');\nasync function profile(){const u=window.__MAX_USER;if(!u)return null;const r=await sb.from('profiles').select('id,username,display_name,bio,avatar_url').eq('id',u.id).maybeSingle();if(r.error||!r.data)return null;window.__MAX_PROFILE=r.data;window.__MAX_AVATAR_URL=r.data.avatar_url||'';return r.data}\nfunction syncAvatar(p){const a=$('.profile-avatar-large');if(!a||!p)return;a.innerHTML=p.avatar_url?`<img src="${esc(p.avatar_url)}" alt="Profile photo">`:`<span>${initial(p.display_name)}</span>`}\nasync function upload(file){const u=window.__MAX_USER;if(!u)throw new Error('Please sign in again.');if(!file?.type.startsWith('image/'))throw new Error('Choose an image file.');if(file.size>8*1024*1024)throw new Error('Profile photo must be 8 MB or smaller.');const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path=`${u.id}/profile-avatar-${crypto.randomUUID()}.${ext}`;const up=await sb.storage.from('post-media').upload(path,file,{contentType:file.type,upsert:false});if(up.error)throw up.error;const url=sb.storage.from('post-media').getPublicUrl(path).data.publicUrl;const r=await sb.from('profiles').update({avatar_url:url}).eq('id',u.id).select('id,avatar_url').single();if(r.error||r.data?.avatar_url!==url)throw new Error('Profile photo could not be saved.');window.__MAX_AVATAR_URL=url;window.__MAX_PROFILE={...(window.__MAX_PROFILE||{id:u.id}),avatar_url:url};return url}\nfunction removeOld(){ $$('.profile-avatar-action').forEach(x=>x.remove());document.querySelectorAll('#maxProfileEditorV2,.profile-v2-layer').forEach(x=>x.remove());}\nfunction editor(modal){if(!modal||modal.dataset.profileRepair==='1')return;const form=$('form',modal),name=$('#profileName',modal),username=$('#profileUsername',modal),bio=$('#profileBio',modal);if(!form||!name||!username||!bio)return;modal.dataset.profileRepair='1';removeOld();$$('label',form).forEach(x=>x.remove());$$('.profile-fields,.profile-identity-editor',modal).forEach(x=>x.remove());const intro=$('.modal-intro',modal);if(intro)intro.remove();const title=$('h2',modal);if(title)title.textContent='Edit profile';const actions=$('.modal-actions',form);const p=window.__MAX_PROFILE||{};const wrap=document.createElement('div');wrap.className='profile-repair-editor';wrap.innerHTML=`<section class="profile-repair-photo-row"><div class="profile-repair-photo" id="profileRepairAvatar">${p.avatar_url?`<img src="${esc(p.avatar_url)}" alt="Profile photo">`:`<span>${initial(p.display_name||name.value)}</span>`}</div><div class="profile-repair-photo-copy"><strong>Profile photo</strong><p>Use a clear photo people will recognize.</p><button type="button" id="profileRepairPhotoBtn">Change photo</button><input id="profileRepairFile" type="file" accept="image/jpeg,image/png,image/webp" hidden></div></section><div class="profile-repair-field"><span>Display name</span><input id="prName" maxlength="80" value="${esc(p.display_name??name.value)}" placeholder="Your display name"></div><div class="profile-repair-field"><span>Username</span><input id="prUsername" maxlength="30" minlength="3" value="${esc(p.username??username.value)}" placeholder="username"><small>3–30 characters: letters, numbers, dots, underscores or hyphens.</small></div><div class="profile-repair-field profile-repair-bio"><div><span>Bio</span><em id="prCount">0 / 280</em></div><textarea id="prBio" maxlength="280" placeholder="Tell people a little about yourself…"></textarea></div><div id="prError" class="profile-repair-error" aria-live="polite"></div>`;$('#prBio',wrap).value=p.bio??bio.value;form.insertBefore(wrap,actions||null);name.type='hidden';username.type='hidden';bio.type='hidden';const vn=$('#prName',wrap),vu=$('#prUsername',wrap),vb=$('#prBio',wrap),count=$('#prCount',wrap),err=$('#prError',wrap);const sync=()=>count.textContent=`${vb.value.length} / 280`;sync();vb.oninput=sync;vn.oninput=()=>{const a=$('#profileRepairAvatar',wrap);a.innerHTML=window.__MAX_AVATAR_URL?`<img src="${esc(window.__MAX_AVATAR_URL)}" alt="Profile photo">`:`<span>${initial(vn.value)}</span>`};const pb=$('#profileRepairPhotoBtn',wrap),fi=$('#profileRepairFile',wrap);pb.onclick=()=>fi.click();fi.onchange=async()=>{const f=fi.files?.[0];if(!f)return;pb.disabled=true;pb.textContent='Saving…';err.textContent='';try{const url=await upload(f);$('#profileRepairAvatar',wrap).innerHTML=`<img src="${esc(url)}" alt="Profile photo">`;syncAvatar(window.__MAX_PROFILE);pb.textContent='Photo saved';setTimeout(()=>pb.textContent='Change photo',1200)}catch(e){err.textContent=e?.message||'Could not update profile photo.';pb.textContent='Change photo'}finally{pb.disabled=false;fi.value=''}};if(actions){const save=actions.querySelector('button[type="submit"],.primary,button:last-child');if(save){save.textContent='Save changes';save.onclick=async e=>{e.preventDefault();err.textContent='';const dn=vn.value.trim(),un=vu.value.trim().toLowerCase().replace(/\\s+/g,''),bv=vb.value.trim();if(!dn){err.textContent='Display name is required.';return}if(!/^[a-z0-9._-]{3,30}$/.test(un)){err.textContent='Username must be 3–30 characters and use letters, numbers, dot, underscore or hyphen.';return}save.disabled=true;save.textContent='Saving…';try{const u=window.__MAX_USER;const r=await sb.from('profiles').update({display_name:dn,username:un,bio:bv||null}).eq('id',u.id);if(r.error)throw r.error;window.__MAX_PROFILE={...(window.__MAX_PROFILE||{}),display_name:dn,username:un,bio:bv||null};if(typeof window.__MAX_RENDER_PROFILE==='function')await window.__MAX_RENDER_PROFILE();modal.remove()}catch(e2){err.textContent=e2?.message||'Could not save profile.';save.disabled=false;save.textContent='Save changes'}}}}}\nasync function repair(){removeOld();const p=await profile();syncAvatar(p);editor($('#profileModal'));}\nnew MutationObserver(()=>setTimeout(repair,50)).observe(document.getElementById('app')||document.body,{childList:true,subtree:true});setTimeout(repair,100);\n})();\n
+(()=>{
+'use strict';
+const sb=window.supabaseClient;
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=v=>String(v??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#039;'}[c]));
+const initial=v=>(String(v||'M').trim().charAt(0).toUpperCase()||'M');
+const flashMsg=(m,ok=false)=>window.flash?window.flash(m,ok):void 0;
+
+async function loadOwnProfile(){
+  const u=window.__MAX_USER|| (await sb.auth.getUser()).data?.user;
+  if(!u)return null;
+  window.__MAX_USER=u;
+  const r=await sb.from('profiles').select('id,username,display_name,bio,avatar_url').eq('id',u.id).maybeSingle();
+  if(r.error||!r.data)return null;
+  window.__MAX_PROFILE=r.data;
+  window.__MAX_AVATAR_URL=r.data.avatar_url||'';
+  return r.data;
+}
+
+async function syncAvatarOnPage(){
+  const page=$('.profile-page');
+  if(!page)return;
+  const p=await loadOwnProfile();
+  if(!p)return;
+  const a=page.querySelector('.profile-avatar-large');
+  if(a)a.innerHTML=p.avatar_url?`<img src="${esc(p.avatar_url)}" alt="Profile photo">`:`<span>${initial(p.display_name)}</span>`;
+  page.querySelectorAll('.profile-avatar-action').forEach(x=>x.remove());
+}
+
+async function uploadAvatar(file){
+  if(!file||!file.type.startsWith('image/'))throw new Error('Choose an image.');
+  if(file.size>8*1024*1024)throw new Error('Profile photo must be 8 MB or smaller.');
+  const u=window.__MAX_USER;
+  if(!u)throw new Error('Please sign in again.');
+  const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+  const path=`${u.id}/profile-avatar-${crypto.randomUUID()}.${ext}`;
+  const up=await sb.storage.from('post-media').upload(path,file,{contentType:file.type,upsert:false});
+  if(up.error)throw up.error;
+  const url=sb.storage.from('post-media').getPublicUrl(path).data.publicUrl;
+  const saved=await sb.from('profiles').update({avatar_url:url}).eq('id',u.id).select('id,avatar_url').maybeSingle();
+  if(saved.error)throw saved.error;
+  if(!saved.data||saved.data.avatar_url!==url)throw new Error('Profile photo could not be saved.');
+  window.__MAX_AVATAR_URL=url;
+  window.__MAX_PROFILE={...(window.__MAX_PROFILE||{}),id:u.id,avatar_url:url};
+  return url;
+}
+
+async function openDedicatedEditor(){
+  const p=await loadOwnProfile();
+  if(!p){flashMsg('Could not load your profile.');return;}
+  $('#maxEditProfileModal')?.remove();
+  const modal=document.createElement('div');
+  modal.id='maxEditProfileModal';
+  modal.className='max-edit-profile-modal';
+  const avatar=p.avatar_url?`<img src="${esc(p.avatar_url)}" alt="Profile photo">`:`<span>${initial(p.display_name)}</span>`;
+  modal.innerHTML=`<div class="max-edit-profile-backdrop" data-close></div><section class="max-edit-profile-card" role="dialog" aria-modal="true" aria-labelledby="maxEditTitle"><header class="max-edit-head"><div><span class="max-edit-kicker">PROFILE</span><h2 id="maxEditTitle">Edit profile</h2><p>Make your MAX profile feel like you.</p></div><button type="button" class="max-edit-close" data-close aria-label="Close">×</button></header><div class="max-edit-identity"><div class="max-edit-avatar" id="maxEditAvatar">${avatar}</div><div class="max-edit-identity-copy"><strong id="maxEditPreviewName">${esc(p.display_name||'Your profile')}</strong><span>@${esc(p.username||'username')}</span><button type="button" id="maxEditPhotoBtn">Change profile picture</button><input id="maxEditPhotoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden></div></div><form id="maxEditForm" class="max-edit-form"><div class="max-edit-field"><label for="maxEditName">Display name</label><input id="maxEditName" maxlength="80" value="${esc(p.display_name||'')}" required></div><div class="max-edit-field"><label for="maxEditUsername">Username</label><div class="max-edit-input-prefix"><span>@</span><input id="maxEditUsername" maxlength="30" minlength="3" value="${esc(p.username||'')}" required></div></div><div class="max-edit-field max-edit-bio"><div class="max-edit-bio-top"><label for="maxEditBio">Bio</label><span id="maxEditBioCount">${(p.bio||'').length}/280</span></div><textarea id="maxEditBio" maxlength="280" placeholder="Tell people a little about you…">${esc(p.bio||'')}</textarea></div><p id="maxEditError" class="max-edit-error" aria-live="polite"></p><footer class="max-edit-actions"><button type="button" class="max-edit-cancel" data-close>Cancel</button><button type="submit" class="max-edit-save" id="maxEditSave">Save changes</button></footer></form></section>`;
+  document.body.appendChild(modal);
+  const close=()=>modal.remove();
+  modal.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',close));
+  const name=$('#maxEditName',modal), bio=$('#maxEditBio',modal), count=$('#maxEditBioCount',modal), save=$('#maxEditSave',modal), err=$('#maxEditError',modal), photoBtn=$('#maxEditPhotoBtn',modal), photoInput=$('#maxEditPhotoInput',modal);
+  name.oninput=()=>{$('#maxEditPreviewName',modal).textContent=name.value||'Your profile'};
+  bio.oninput=()=>{count.textContent=`${bio.value.length}/280`};
+  photoBtn.onclick=()=>photoInput.click();
+  photoInput.onchange=async()=>{const file=photoInput.files?.[0];if(!file)return;photoBtn.disabled=true;photoBtn.textContent='Saving…';try{const url=await uploadAvatar(file);$('#maxEditAvatar',modal).innerHTML=`<img src="${esc(url)}" alt="Profile photo">`;const page=$('.profile-page');const a=page?.querySelector('.profile-avatar-large');if(a)a.innerHTML=`<img src="${esc(url)}" alt="Profile photo">`;photoBtn.textContent='Photo saved';setTimeout(()=>photoBtn.textContent='Change profile picture',1200)}catch(e){photoBtn.textContent='Change profile picture';flashMsg(e.message||'Could not update photo')}finally{photoBtn.disabled=false;photoInput.value=''}};
+  $('#maxEditForm',modal).onsubmit=async e=>{e.preventDefault();err.textContent='';const displayName=name.value.trim();const username=$('#maxEditUsername',modal).value.trim().toLowerCase().replace(/\s+/g,'');const bioValue=bio.value.trim();if(!displayName)return err.textContent='Display name is required.';if(!/^[a-z0-9._-]{3,30}$/.test(username))return err.textContent='Username must be 3–30 characters.';save.disabled=true;save.textContent='Saving…';try{const r=await sb.from('profiles').update({display_name:displayName,username,bio:bioValue||null}).eq('id',window.__MAX_USER.id);if(r.error)throw r.error;window.__MAX_PROFILE={...(window.__MAX_PROFILE||{}),display_name:displayName,username,bio:bioValue||null};close();await syncAvatarOnPage()}catch(e2){err.textContent=e2?.message||'Could not save profile.';save.disabled=false;save.textContent='Save changes'}};
+}
+
+function removeLegacy(){
+  $$('#profile-avatar-action,.profile-avatar-action').forEach(x=>x.remove());
+  $('#profileModal')?.remove();
+}
+
+// One authoritative editor: intercept before the legacy app handler can open its form.
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('#editProfile');
+  if(!btn)return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  removeLegacy();
+  openDedicatedEditor();
+},true);
+
+const mo=new MutationObserver(()=>{
+  removeLegacy();
+  const page=$('.profile-page');
+  if(page&&!page.dataset.maxAvatarSynced){page.dataset.maxAvatarSynced='1';syncAvatarOnPage();}
+});
+mo.observe(document.getElementById('app')||document.body,{childList:true,subtree:true});
+setTimeout(()=>{removeLegacy();syncAvatarOnPage()},120);
+})();
