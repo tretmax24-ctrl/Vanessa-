@@ -1,0 +1,10 @@
+/* Call controls stay beside the contact identity, never stack vertically. */
+.conversation-head{display:flex!important;align-items:center!important;flex-wrap:nowrap!important;min-width:0!important;gap:10px!important}
+.conversation-head .conversation-spacer{flex:1 1 auto!important;min-width:0!important}
+.conversation-head .max-call-actions{display:flex!important;flex:0 0 auto!important;flex-direction:row!important;align-items:center!important;justify-content:flex-end!important;gap:8px!important;margin-left:auto!important;white-space:nowrap!important}
+.conversation-head .max-call-btn{display:inline-flex!important;flex:0 0 auto!important;position:relative!important;transform:none}
+@media(max-width:900px){
+  .conversation-head{gap:8px!important}
+  .conversation-head .max-call-actions{gap:6px!important}
+  .conversation-head .max-call-btn{width:42px!important;height:42px!important;border-radius:13px!important}
+}
