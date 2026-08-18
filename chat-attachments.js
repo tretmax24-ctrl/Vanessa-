@@ -1,0 +1,96 @@
+(()=>{
+'use strict';
+const sb=window.supabaseClient;
+const $=(s,r=document)=>r.querySelector(s);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+const state={pending:null,origFrom:null,observer:null,decorateTimer:null};
+const MAX_SIZE=50*1024*1024;
+const IMAGE=/^image\/(jpeg|png|webp)$/i;
+const VIDEO=/^video\/(mp4|webm|quicktime)$/i;
+function notify(msg){window.flash?.(msg);}
+function filename(name){return name.replace(/[^a-zA-Z0-9._-]+/g,'-').slice(0,120)||'attachment';}
+function isSupported(file){return IMAGE.test(file.type)||VIDEO.test(file.type);}
+function pendingChip(form){
+  let chip=form.querySelector('#chatAttachmentChip');
+  if(!state.pending){chip?.remove();return;}
+  if(!chip){chip=document.createElement('div');chip.id='chatAttachmentChip';chip.className='chat-attachment-chip';form.prepend(chip)}
+  const p=state.pending;
+  chip.innerHTML=`<span>${p.kind==='image'?'🖼️':'🎬'} ${esc(p.name)}</span><button type="button" id="chatAttachmentClear" aria-label="Remove attachment">×</button>`;
+  chip.querySelector('#chatAttachmentClear').onclick=()=>{state.pending=null;pendingChip(form)};
+}
+async function upload(file,conversationId,userId){
+  if(!conversationId||!userId)throw new Error('Open a conversation first.');
+  if(file.size>MAX_SIZE)throw new Error('Attachment is larger than 50 MB.');
+  if(!isSupported(file))throw new Error('MAX chat attachments currently support JPG, PNG, WebP, MP4, WebM and QuickTime video.');
+  const path=`${userId}/chat/${conversationId}/${Date.now()}-${filename(file.name)}`;
+  const up=await sb.storage.from('post-media').upload(path,file,{contentType:file.type,upsert:false});
+  if(up.error)throw up.error;
+  const pub=sb.storage.from('post-media').getPublicUrl(path);
+  return {url:pub.data.publicUrl,name:file.name,mime:file.type,kind:IMAGE.test(file.type)?'image':'video'};
+}
+function decorateMessages(){
+  clearTimeout(state.decorateTimer);
+  state.decorateTimer=setTimeout(async()=>{
+    const box=$('#chatMessages');
+    const conv=window.__MAX_CHAT_CONVERSATION_ID;
+    if(!box||!conv)return;
+    const r=await sb.from('messages').select('id,type,content,attachment_url,created_at').eq('conversation_id',conv).order('created_at',{ascending:true}).limit(300);
+    if(r.error||!r.data?.length)return;
+    const bubbles=[...box.querySelectorAll('.bubble')];
+    r.data.forEach((m,i)=>{
+      const b=bubbles[i];
+      if(!b||!m.attachment_url||b.dataset.attachmentDecorated==='1')return;
+      const body=b.querySelector('div');
+      if(!body)return;
+      const wrap=document.createElement('div');wrap.className='chat-attachment-preview';
+      const isVideo=/\.(mp4|webm|mov|m4v)(\?|$)/i.test(m.attachment_url);
+      if(m.type==='image'&&!isVideo){
+        const img=document.createElement('img');img.src=m.attachment_url;img.alt=m.content||'Image attachment';img.loading='lazy';wrap.appendChild(img);
+      }else if(isVideo){
+        const v=document.createElement('video');v.src=m.attachment_url;v.controls=true;v.playsInline=true;v.preload='metadata';wrap.appendChild(v);
+      }else{
+        const a=document.createElement('a');a.href=m.attachment_url;a.target='_blank';a.rel='noopener';a.textContent='Open attachment';wrap.appendChild(a);
+      }
+      body.replaceWith(wrap);
+      b.dataset.attachmentDecorated='1';
+    });
+  },120);
+}
+function patchMessageInsert(){
+  if(state.origFrom||!sb?.from)return;
+  state.origFrom=sb.from.bind(sb);
+  sb.from=function(table){
+    const query=state.origFrom(table);
+    if(table!=='messages'||!query?.insert)return query;
+    const origInsert=query.insert.bind(query);
+    query.insert=(payload,options)=>{
+      const p=state.pending;
+      const next=Array.isArray(payload)?payload.map(x=>({...x})):({...payload});
+      const rows=Array.isArray(next)?next:[next];
+      if(p){
+        rows.forEach(row=>{row.type=p.kind==='image'?'image':'file';row.content=p.name;row.attachment_url=p.url});
+      }
+      const result=origInsert(Array.isArray(payload)?rows:rows[0],options);
+      if(p&&result?.then){result.then(res=>{if(!res?.error){state.pending=null;pendingChip($('#chatCompose'));decorateMessages()}})}
+      return result;
+    };
+    return query;
+  };
+}
+function enhance(){
+  const form=$('#chatCompose');
+  if(!form)return;
+  if(!form.querySelector('#chatAttachButton')){
+    const label=document.createElement('button');label.type='button';label.id='chatAttachButton';label.className='chat-attach-btn';label.textContent='📎';label.title='Add photo or video';
+    const input=document.createElement('input');input.type='file';input.id='chatAttachmentInput';input.accept='image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime';input.hidden=true;
+    label.onclick=()=>input.click();
+    input.onchange=async()=>{const file=input.files?.[0];input.value='';if(!file)return;try{const user=await sb.auth.getUser();const conv=window.__MAX_CHAT_CONVERSATION_ID;if(!conv)throw new Error('Open a conversation first.');state.pending=await upload(file,conv,user.data.user?.id);pendingChip(form)}catch(e){notify(e?.message||'Attachment upload failed')}};
+    const send=form.querySelector('button[type="submit"],button:not([type])');
+    if(send){form.insertBefore(label,send);form.insertBefore(input,send)}else{form.append(label,input)}
+  }
+  pendingChip(form);patchMessageInsert();decorateMessages();
+  if(!state.observer){state.observer=new MutationObserver(enhance);state.observer.observe(document.getElementById('app')||document.body,{subtree:true,childList:true})}
+}
+window.__MAX_CHAT_ATTACHMENTS_ENHANCE=enhance;
+setInterval(enhance,1200);
+})();
