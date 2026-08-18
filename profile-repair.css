@@ -1,0 +1,23 @@
+.profile-avatar-action{display:none!important}
+
+.profile-repair-identity{display:flex;align-items:center;gap:18px;padding:18px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(135deg,rgba(255,255,255,.05),rgba(255,255,255,.025));border-radius:22px;margin:8px 0 20px}
+.profile-repair-avatar{width:82px;height:82px;flex:0 0 82px;border-radius:50%;overflow:hidden;background:#151922;border:2px solid rgba(255,255,255,.12);display:grid;place-items:center;font-size:28px;font-weight:850;color:#fff}
+.profile-repair-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.profile-repair-identity-copy{display:grid;gap:5px;min-width:0}
+.profile-repair-identity-copy strong{font-size:18px;line-height:1.15;color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-repair-identity-copy span{font-size:12px;color:rgba(255,255,255,.55)}
+.profile-repair-identity-copy button{justify-self:start;margin-top:4px;border:1px solid rgba(123,108,255,.45);background:rgba(123,108,255,.12);color:#fff;border-radius:12px;padding:9px 12px;font-weight:800;cursor:pointer}
+.profile-repair-identity-copy button:hover{background:rgba(123,108,255,.2)}
+.profile-repair-identity-copy button:disabled{opacity:.65;cursor:wait}
+.profile-repair-fields{display:grid;gap:13px}
+.profile-repair-field{display:grid;gap:7px;padding:13px 14px;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.025);border-radius:16px}
+.profile-repair-field-head{display:grid;gap:2px}
+.profile-repair-field-head strong{font-size:12px;letter-spacing:.02em;color:#fff}
+.profile-repair-field-head span{font-size:11px;color:rgba(255,255,255,.45)}
+.profile-repair-field input,.profile-repair-field textarea{width:100%;box-sizing:border-box;border:0!important;outline:0;background:transparent!important;color:#fff!important;padding:3px 0!important;margin:0!important;font:inherit!important;box-shadow:none!important;min-height:0!important}
+.profile-repair-field textarea{resize:none;min-height:88px!important;line-height:1.45!important}
+#profileModal h2{margin-bottom:4px}
+#profileModal .modal-intro{margin-bottom:8px;line-height:1.45;color:rgba(255,255,255,.58)}
+#profileModal .modal-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+#profileModal .modal-actions .primary{min-width:128px}
+@media(max-width:640px){.profile-repair-identity{padding:14px;gap:13px}.profile-repair-avatar{width:68px;height:68px;flex-basis:68px}.profile-repair-identity-copy strong{font-size:16px}.profile-repair-fields{gap:10px}.profile-repair-field{padding:12px}}
