@@ -10,7 +10,8 @@
     "android:build": "cd android && ./gradlew assembleDebug"
   },
   "devDependencies": {
-    "@capacitor/cli": "8.5.0"
+    "@capacitor/cli": "8.5.0",
+    "typescript": "^5.9.2"
   },
   "dependencies": {
     "@capacitor/android": "8.5.0",
