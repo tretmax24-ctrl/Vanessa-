@@ -1,0 +1,28 @@
+.max-profile-editor{position:fixed;inset:0;z-index:3000;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.62);backdrop-filter:blur(10px)}
+.max-profile-editor-card{width:min(560px,100%);max-height:min(92dvh,760px);overflow:auto;background:#0d1018;border:1px solid rgba(255,255,255,.1);border-radius:28px;box-shadow:0 30px 90px rgba(0,0,0,.52);color:#fff}
+.max-profile-editor-head{display:flex;align-items:flex-start;justify-content:space-between;padding:24px 24px 8px}
+.max-profile-editor-eyebrow{font-size:10px;letter-spacing:.14em;font-weight:900;color:rgba(255,255,255,.42)}
+.max-profile-editor-title{margin:5px 0 0;font-size:29px;line-height:1.04;font-weight:900}
+.max-profile-editor-close{width:38px;height:38px;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:rgba(255,255,255,.04);color:#fff;font-size:24px;cursor:pointer}
+.max-profile-editor-body{padding:16px 24px 24px;display:grid;gap:14px}
+.max-profile-editor-photo{display:flex;align-items:center;gap:16px;padding:16px;border-radius:22px;background:linear-gradient(135deg,rgba(255,255,255,.065),rgba(255,255,255,.025));border:1px solid rgba(255,255,255,.08)}
+.max-profile-editor-avatar{width:88px;height:88px;flex:0 0 88px;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#171b26;border:3px solid rgba(255,255,255,.1);font-size:28px;font-weight:900}
+.max-profile-editor-avatar img{width:100%;height:100%;object-fit:cover;display:block}
+.max-profile-editor-photo-copy{min-width:0;display:grid;gap:4px}
+.max-profile-editor-photo-copy strong{font-size:17px;line-height:1.2}
+.max-profile-editor-photo-copy span{font-size:12px;color:rgba(255,255,255,.5)}
+.max-profile-editor-change{margin-top:7px;justify-self:start;border:1px solid rgba(255,255,255,.14);background:#fff;color:#0a0c10;border-radius:12px;padding:10px 14px;font-weight:850;cursor:pointer}
+.max-profile-editor-change:disabled{opacity:.58;cursor:wait}
+.max-profile-editor-field{display:grid;gap:7px;padding:14px 15px;border:1px solid rgba(255,255,255,.08);border-radius:17px;background:rgba(255,255,255,.025)}
+.max-profile-editor-field label{font-size:12px;font-weight:850;color:rgba(255,255,255,.7)}
+.max-profile-editor-field input,.max-profile-editor-field textarea{width:100%;box-sizing:border-box;border:0;outline:0;background:transparent;color:#fff;padding:2px 0;font:inherit;box-shadow:none}
+.max-profile-editor-field input{height:28px}
+.max-profile-editor-field textarea{min-height:92px;resize:vertical;line-height:1.45}
+.max-profile-editor-help{font-size:11px;color:rgba(255,255,255,.34)}
+.max-profile-editor-error{min-height:18px;margin:0;color:#ff919c;font-size:12px;line-height:1.4}
+.max-profile-editor-actions{display:flex;gap:10px;justify-content:flex-end;padding-top:4px}
+.max-profile-editor-actions button{min-width:120px;border-radius:14px;padding:12px 16px;font-weight:850;cursor:pointer}
+.max-profile-editor-cancel{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:#fff}
+.max-profile-editor-save{border:0;background:#fff;color:#080a0f}
+.max-profile-editor-actions button:disabled{opacity:.6;cursor:wait}
+@media(max-width:640px){.max-profile-editor{padding:8px}.max-profile-editor-card{border-radius:24px;max-height:94dvh}.max-profile-editor-head{padding:20px 18px 8px}.max-profile-editor-body{padding:12px 18px 18px}.max-profile-editor-photo{padding:14px;gap:13px}.max-profile-editor-avatar{width:72px;height:72px;flex-basis:72px;font-size:23px}.max-profile-editor-title{font-size:25px}.max-profile-editor-actions{position:sticky;bottom:0;padding:14px 0 0;background:linear-gradient(180deg,rgba(13,16,24,0),#0d1018 28%)}.max-profile-editor-actions button{flex:1}}
